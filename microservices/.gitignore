@@ -9,8 +9,8 @@ __pycache__/
 # dotenv
 .env
 
-# data base
-pet/microservices/auth/db.txt
+# database
+db.txt
 
-#private key
-pet/microservices/auth/certs/jwt-private.pem
+# private key
+jwt-private.pem
