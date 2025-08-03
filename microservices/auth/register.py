@@ -1,14 +1,24 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Form, Depends
 from sqlalchemy import select
-from main import SessionDep
+from database import SessionDep
 from pwd_operations import hash_password
 from shemas import UserScheme
 from models import AuthModel
+from typing import Annotated
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import get_session
 
 router = APIRouter(tags=["REGISTRATION"])
 
 @router.post("/register")
-async def add_user(data: UserScheme, session: SessionDep):
+async def add_user(
+    # data: UserScheme,
+    login: Annotated[str, Form()],
+    password: Annotated[str, Form()],
+    session: AsyncSession = Depends(get_session)):
+    
+    
+    data = UserScheme(login=login, password=password)
     result = await session.execute(select(AuthModel).where(AuthModel.login == data.login))
     existing_user = result.scalar_one_or_none()
 
