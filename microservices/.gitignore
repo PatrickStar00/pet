@@ -2,7 +2,7 @@
 .DS_Store
 
 # Python venv
-.venv/
+venv/
 __pycache__/
 *.pyc
 
@@ -14,3 +14,4 @@ db.txt
 
 # private key
 jwt-private.pem
+jwt-public.pem
