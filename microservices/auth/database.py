@@ -2,10 +2,13 @@ from typing import Annotated
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from fastapi import Depends, APIRouter
 from models import Base
+from dotenv import load_dotenv
+import os
 
 router = APIRouter()
 
-DATABASE_URL = open('db.txt', 'r').read().strip()
+load_dotenv()
+DATABASE_URL = os.getenv("DB_URL")
 engine = create_async_engine(DATABASE_URL, echo=True)
 
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
