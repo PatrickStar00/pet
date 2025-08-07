@@ -19,25 +19,21 @@ async def validate_auth(
         select(AuthModel).where(AuthModel.login == login)
     )
     user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
     if not user or not operats.check_password(password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password"
         )
-        
+
+
     return user
 
-    # if not user:
-    #     raise HTTPException(status_code=404, detail="Пользователь не найден")
-
-    # if not operats.check_password(password, user.password):
-    #     raise HTTPException(status_code=401, detail="Неверный пароль")
-    # pass
-
 @router.post("/login/", response_model=TokenInfo)
-def auth_user(user: UserScheme = Depends(validate_auth)):
-    
+async def auth_user(user: UserScheme = Depends(validate_auth)):
     
     
     jwt_payload = {

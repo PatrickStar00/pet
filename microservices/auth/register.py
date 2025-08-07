@@ -12,7 +12,6 @@ router = APIRouter(tags=["REGISTRATION"])
 
 @router.post("/register")
 async def add_user(
-    # data: UserScheme,
     login: Annotated[str, Form()],
     password: Annotated[str, Form()],
     session: AsyncSession = Depends(get_session)):
