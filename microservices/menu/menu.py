@@ -6,13 +6,14 @@ from sqlalchemy import select
 
 
 router = APIRouter(tags=["MENU"])
-@router.post("/menu")
+@router.get("/menu")
 async def check_menu(session: AsyncSession = Depends(get_session)):
     result = await session.execute(select(MenuModel))
     menu_items = result.scalars().all()  # список объектов MenuModel
     
     return [
         {
+            "id": item.id,
             "name": item.name,
             "category": item.category,
             "price": item.price,
