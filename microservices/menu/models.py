@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
 class MenuModel(Base):
     __tablename__ = "menu"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), unique=True)
     category: Mapped[str] = mapped_column(String(100))
     price: Mapped[int] = mapped_column(Integer)
