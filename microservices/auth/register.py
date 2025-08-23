@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Form, Depends
 from sqlalchemy import select
-from pwd_operations import hash_password
+from pwd_jwt_operations import hash_password
 from shemas import UserScheme
 from models import AuthModel
 from typing import Annotated

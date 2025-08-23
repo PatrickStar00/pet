@@ -1,14 +1,40 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, status
-import pwd_operations as operats
+import pwd_jwt_operations as operats
 from sqlalchemy.ext.asyncio import AsyncSession
 from shemas import TokenInfo, UserScheme
 from models import AuthModel
 from sqlalchemy import select
 from database import get_session
+from fastapi.security import OAuth2PasswordBearer
+from jwt import InvalidTokenError
 
 router = APIRouter(tags=["JWT"])
 
+oauth2 = OAuth2PasswordBearer(tokenUrl="/login/")
+
+def get_token_payload(
+    token: str = Depends(oauth2)
+) -> UserScheme:
+    try:
+        payload = operats.decode_jwt(token=token)
+    except InvalidTokenError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"invalid token error: {e}"
+        )
+    return payload
+
+async def check_jwt(
+    payload: dict = Depends(get_token_payload),
+    session: AsyncSession = Depends(get_session)
+) -> UserScheme:
+    
+    user_id: str | None = payload.get("sub")
+    result = await session.execute(
+        select(AuthModel).where(AuthModel.id == user_id))
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found(jwt token)")
 
 async def validate_auth(
     login: Annotated[str, Form()],
@@ -34,7 +60,6 @@ async def validate_auth(
 
 @router.post("/login/", response_model=TokenInfo)
 async def auth_user(user: UserScheme = Depends(validate_auth)):
-    
     
     jwt_payload = {
         "sub" : user.id,
