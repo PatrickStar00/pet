@@ -1,8 +1,9 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import String, Integer, ForeignKey, DateTime
 from datetime import datetime
+from typing import List
 
-# Базовый класс для всех моделей
+# Базовый класс
 class Base(DeclarativeBase):
     pass
 
@@ -10,8 +11,23 @@ class OrderModel(Base):
     __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer, nullable=False)  # кто заказал
-    items: Mapped[str] = mapped_column(String, nullable=False)  # JSON-строка со списком блюд
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
     total_price: Mapped[int] = mapped_column(Integer, nullable=False)
-    status: Mapped[str] = mapped_column(String, default="pending")  # pending / cooking / delivering / completed
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    status: Mapped[str] = mapped_column(String, default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Отношение: один заказ имеет много позиций
+    items: Mapped[List["OrderItemModel"]] = relationship(back_populates="order")
+
+class OrderItemModel(Base):
+    __tablename__ = "order_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # Связь с таблицей "orders"
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id")) # ID блюда из menu service
+    menu_item_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Цена блюда в момент оформления заказа (чтобы история не менялась, если цена в menu service изменится)
+    price_at_time_of_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Отношение: позиция принадлежит одному заказу
+    order: Mapped["OrderModel"] = relationship(back_populates="items")
