@@ -29,6 +29,11 @@ async def check_jwt(
 ) -> UserScheme:
     
     user_id: str | None = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token payload is missing user ID"
+        )
     result = await session.execute(
         select(AuthModel).where(AuthModel.id == user_id))
     user = result.scalar_one_or_none()
@@ -67,5 +72,11 @@ async def auth_user(user: UserScheme = Depends(validate_auth)):
     }
     token = operats.encode_jwt(payload=jwt_payload)
     return TokenInfo(access_token=token, token_type="Bearer")
+
+@router.get("/verify_token", response_model=UserScheme)
+async def verify_token_endpoint(
+    user_data: AuthModel = Depends(check_jwt)
+):
+    return user_data
 
     
