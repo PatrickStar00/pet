@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 import pwd_jwt_operations as operats
 from sqlalchemy.ext.asyncio import AsyncSession
-from shemas import TokenInfo, UserScheme
+from shemas import TokenInfo, UserScheme, UserPublicScheme
 from models import AuthModel
 from sqlalchemy import select
 from database import get_session
@@ -23,12 +23,13 @@ def get_token_payload(
         )
     return payload
 
-async def check_jwt(
+async def validate_jwt(
     payload: dict = Depends(get_token_payload),
     session: AsyncSession = Depends(get_session)
 ) -> UserScheme:
     
     user_id: str | None = payload.get("sub")
+    user_id = int(user_id)
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -40,14 +41,16 @@ async def check_jwt(
     
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found(jwt token)")
+    
+    return user
 
 async def validate_auth(
-    login: Annotated[str, Form()],
+    username: Annotated[str, Form()],
     password: Annotated[str, Form()],
     session: AsyncSession = Depends(get_session)  # Зависимость для получения сессии
 ):
     result = await session.execute(
-        select(AuthModel).where(AuthModel.login == login)
+        select(AuthModel).where(AuthModel.login == username)
     )
     user = result.scalar_one_or_none()
     
@@ -60,23 +63,19 @@ async def validate_auth(
             detail="Invalid username or password"
         )
 
-
     return user
 
 @router.post("/login/", response_model=TokenInfo)
 async def auth_user(user: UserScheme = Depends(validate_auth)):
-    
     jwt_payload = {
-        "sub" : user.id,
+        "sub" : str(user.id),
         "username" :user.login,
     }
     token = operats.encode_jwt(payload=jwt_payload)
     return TokenInfo(access_token=token, token_type="Bearer")
 
-@router.get("/verify_token", response_model=UserScheme)
+@router.get("/verify_token")
 async def verify_token_endpoint(
-    user_data: AuthModel = Depends(check_jwt)
+    user: AuthModel = Depends(validate_jwt)
 ):
-    return user_data
-
-    
+    return {"user_id": user.id} 

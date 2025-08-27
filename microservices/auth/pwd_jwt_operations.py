@@ -26,7 +26,7 @@ def encode_jwt(payload: dict,
     return encoded
 
 def decode_jwt(token: str, public_key = auth_jwt.public_key, algorithm = auth_jwt.algorithm):
-    decoded = jwt.decode(token, public_key, algorithm = algorithm)
+    decoded = jwt.decode(token, public_key, algorithms = algorithm)
     return decoded
 
 def hash_password(password: str) -> str:
