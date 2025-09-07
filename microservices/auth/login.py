@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 import pwd_jwt_operations as operats
 from sqlalchemy.ext.asyncio import AsyncSession
-from shemas import TokenInfo, UserScheme, UserPublicScheme
+from shemas import TokenInfo, UserScheme
 from models import AuthModel
 from sqlalchemy import select
 from database import get_session
