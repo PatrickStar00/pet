@@ -74,7 +74,7 @@ async def auth_user(user: UserScheme = Depends(validate_auth)):
     token = operats.encode_jwt(payload=jwt_payload)
     return TokenInfo(access_token=token, token_type="Bearer")
 
-@router.get("/verify_token")
+@router.get("/get_id")
 async def verify_token_endpoint(
     user: AuthModel = Depends(validate_jwt)
 ):
