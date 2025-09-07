@@ -23,7 +23,7 @@ async def check_menu(session: AsyncSession = Depends(get_session)):
         for item in menu_items
     ]
     
-@router.get("/menu/{id}/price")
+@router.get("/price/{id}")
 async def get_price_by_id(
     id: int,
     session: AsyncSession = Depends(get_session)
