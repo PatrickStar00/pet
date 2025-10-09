@@ -14,7 +14,6 @@ class OrderRequest(BaseModel):
 # Схема для данных, которые возвращает Auth Service
 class AuthResponse(BaseModel):
     user_id: int
-    is_authenticated: bool
 
 # Схема для данных, которые возвращает Menu Service
 class MenuItem(BaseModel):

@@ -17,7 +17,10 @@ class OrderModel(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Отношение: один заказ имеет много позиций
-    items: Mapped[List["OrderItemModel"]] = relationship(back_populates="order")
+    items: Mapped[List["OrderItemModel"]] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan"
+    )
 
 class OrderItemModel(Base):
     __tablename__ = "order_items"

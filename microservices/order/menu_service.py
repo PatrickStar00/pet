@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-MENU_SERVICE_BASE_URL = os.dotenv("MENU_URL")
+MENU_SERVICE_BASE_URL = os.getenv("MENU_URL")
 
 async def get_menu_item_price(item_id: int) -> int:
     try:
