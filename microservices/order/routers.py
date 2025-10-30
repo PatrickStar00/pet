@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, APIRouter, Form
+from fastapi import FastAPI, Depends, APIRouter, Form, HTTPException, status
 from shemas import OrderRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -64,3 +64,24 @@ async def get_my_orders(
         return {"message": "У пользователя нет заказов"}
 
     return {"user_id": user_id, "orders": orders}
+
+@router.delete("/delete_order")
+async def delete_order(
+    order_id: str = Annotated[str, Form()],
+    session: AsyncSession = Depends(get_session),
+    Authorization: str = Annotated[str, Form()]
+):
+    user_id = await get_user_id(Authorization)
+    
+    result = await session.execute(select(OrderModel).where(OrderModel.id == int(order_id)))
+    order = result.scalar_one_or_none()
+    
+    if int(order.id) != int(order_id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="forbidden access")
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="order not found")
+    
+    await session.delete(order)
+    await session.commit()
+    
+    return {"message": f"Заказ {order_id} успешно удалён"}
