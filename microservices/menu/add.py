@@ -11,25 +11,14 @@ router = APIRouter(tags=["ADD DISH"])
 
 @router.post("/add_dish")
 async def add_dish(
-    name: Annotated[str, Form()],
-    category: Annotated[str, Form()],
-    price: Annotated[int, Form()],
-    description: Annotated[Optional[str], Form()] = None, 
+    dish: DishCreate,
     session: AsyncSession = Depends(get_session)):
     
-    
-    data = DishCreate(
-        name=name, 
-        category=category, 
-        price=price, 
-        description=description,
-    )
-    
     new_dish = MenuModel(
-        name=data.name,
-        category=data.category,
-        price=data.price,
-        description=data.description,
+        name=dish.name,
+        category=dish.category,
+        price=dish.price,
+        description=dish.description,
     )
 
     session.add(new_dish)

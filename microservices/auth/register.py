@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Form, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import select
 from pwd_jwt_operations import hash_password
 from shemas import UserScheme
@@ -11,24 +11,23 @@ router = APIRouter(tags=["REGISTRATION"])
 
 @router.post("/register")
 async def add_user(
-    login: Annotated[str, Form()],
-    password: Annotated[str, Form()],
+    user_data: UserScheme,
     session: AsyncSession = Depends(get_session)):
     
     
-    data = UserScheme(login=login, password=password)
-    result = await session.execute(select(AuthModel).where(AuthModel.login == data.login))
+    # data = UserScheme(login=login, password=password)
+    result = await session.execute(select(AuthModel).where(AuthModel.login == user_data.login))
     existing_user = result.scalar_one_or_none()
 
     if existing_user:
         raise HTTPException(
             status_code=409,  
-            detail=f"Логин '{data.login}' уже занят"
+            detail=f"Логин '{user_data.login}' уже занят"
         )
         
-    hashed = hash_password(data.password)
+    hashed = hash_password(user_data.password)
     new_user = AuthModel(
-        login=data.login,
+        login=user_data.login,
         password=hashed
     )
     

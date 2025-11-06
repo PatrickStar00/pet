@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_session
 from models import MenuModel
 from sqlalchemy import select
-from typing import Annotated
+from shemas import DishFind
 
 
 router = APIRouter(tags=["MENU"])
@@ -23,12 +23,12 @@ async def check_menu(session: AsyncSession = Depends(get_session)):
         for item in menu_items
     ]
     
-@router.get("/price/{id}")
+@router.get("/price")
 async def get_price_by_id(
-    id: int,
+    find_dish: DishFind,
     session: AsyncSession = Depends(get_session)
 ):
-    query = select(MenuModel.price).where(MenuModel.id == id)
+    query = select(MenuModel.price).where(MenuModel.id == find_dish.id)
     result = await session.execute(query)
     price = result.scalar_one_or_none()
     

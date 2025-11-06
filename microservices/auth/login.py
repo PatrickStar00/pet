@@ -45,37 +45,38 @@ async def validate_jwt(
     return user
 
 async def validate_auth(
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
+    user_data: UserScheme,
     session: AsyncSession = Depends(get_session)  # Зависимость для получения сессии
-):
-    result = await session.execute(
-        select(AuthModel).where(AuthModel.login == username)
-    )
+    ):
+    
+    result = await session.execute(select(AuthModel).where(AuthModel.login == user_data.login))
     user = result.scalar_one_or_none()
     
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if not user or not operats.check_password(password, user.password):
+    if not user or not operats.check_password(user_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password"
         )
-
+        
     return user
 
-@router.post("/login/", response_model=TokenInfo)
+@router.post("/login", response_model=TokenInfo)
 async def auth_user(user: UserScheme = Depends(validate_auth)):
+    
     jwt_payload = {
         "sub" : str(user.id),
         "username" :user.login,
     }
+    
     token = operats.encode_jwt(payload=jwt_payload)
     return TokenInfo(access_token=token, token_type="Bearer")
 
 @router.get("/get_id")
 async def verify_token_endpoint(
     user: AuthModel = Depends(validate_jwt)
-):
+    ):
+    
     return {"user_id": user.id} 
