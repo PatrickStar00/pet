@@ -65,8 +65,8 @@ async def get_my_orders(
 
     return {"user_id": user_id, "orders": orders}
 
-@router.delete("/delete_order")
-async def delete_order(
+@router.post("/cancel")
+async def canceled_order(
     order_id: str = Annotated[str, Form()],
     session: AsyncSession = Depends(get_session),
     Authorization: str = Annotated[str, Form()]
@@ -76,12 +76,10 @@ async def delete_order(
     result = await session.execute(select(OrderModel).where(OrderModel.id == int(order_id)))
     order = result.scalar_one_or_none()
     
-    if int(order.id) != int(order_id):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="forbidden access")
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="order not found")
     
-    await session.delete(order)
+    order.status = "canceled"
     await session.commit()
     
-    return {"message": f"Заказ {order_id} успешно удалён"}
+    return {"message": f"Заказ {order_id} отменен"}
