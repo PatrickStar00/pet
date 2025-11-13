@@ -6,9 +6,3 @@ class DishCreate(BaseModel):
     category: str
     price: int
     description: Optional[str] = None
-
-class DishFind(BaseModel):
-    id: int
-    name: Optional[str] = None
-
-    
