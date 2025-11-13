@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Form, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
 from database import get_session
@@ -15,7 +15,7 @@ async def delete_dish(
     find_dish: DishFind,
     session: AsyncSession = Depends(get_session)):
     
-    if not id and not name:
+    if not find_dish.id and not find_dish.name:
         raise HTTPException(status_code=400, detail="Укажите id или name для удаления блюда.")
 
     # Поиск по id или по name
