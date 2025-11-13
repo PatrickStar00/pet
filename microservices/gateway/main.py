@@ -27,7 +27,6 @@ async def proxy_post(service: str, path: str, request: Request, body: Optional[d
 async def proxy_delete(service: str, path: str, request: Request, body: Optional[dict] = Body(None)):
     return await proxy_request(service, path, request)
 
-
 async def proxy_request(
     service: str, 
     path: str, 
@@ -37,15 +36,17 @@ async def proxy_request(
         return {"error": "Unknown service"}
 
     decoded_path = unquote(path)
-
+    
     target_url = f"{SERVICES[service]}/{decoded_path}"
+    
     method = request.method
     headers = dict(request.headers)
     body = await request.body()
 
     async with httpx.AsyncClient() as client:
         response = await client.request(
-            method, target_url,
+            method, 
+            target_url,
             headers=headers,
             content=body,
             params=request.query_params,
