@@ -9,7 +9,7 @@ MENU_SERVICE_BASE_URL = os.getenv("MENU_URL")
 async def get_menu_item_price(item_id: int) -> int:
     try:
         async with httpx.AsyncClient() as client:
-            menu_response = await client.get(f"{MENU_SERVICE_BASE_URL}/{item_id}")
+            menu_response = await client.get(f"{MENU_SERVICE_BASE_URL}/price", params={"id": item_id})
             menu_response.raise_for_status()
             menu_item_data = menu_response.json()
             return menu_item_data["price"]

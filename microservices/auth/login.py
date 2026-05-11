@@ -7,7 +7,7 @@ from models import AuthModel
 from sqlalchemy import select
 from database import get_session
 from fastapi.security import OAuth2PasswordBearer
-from jwt import InvalidTokenError
+from jwt.exceptions import InvalidTokenError
 
 router = APIRouter(tags=["JWT"])
 
