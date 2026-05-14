@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Form, Depends
-from typing import Annotated
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_session
 from models import MenuModel
 from shemas import DishCreate
-from typing import Optional
 
 
 router = APIRouter(tags=["ADD DISH"])

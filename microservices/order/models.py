@@ -3,7 +3,6 @@ from sqlalchemy import String, Integer, ForeignKey, DateTime
 from datetime import datetime
 from typing import List
 
-# Базовый класс
 class Base(DeclarativeBase):
     pass
 
@@ -28,7 +27,6 @@ class OrderItemModel(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) # Связь с таблицей "orders"
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id")) # ID блюда из menu service
     menu_item_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    # Цена блюда в момент оформления заказа (чтобы история не менялась, если цена в menu service изменится)
     price_at_time_of_order: Mapped[int] = mapped_column(Integer, nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
 

@@ -13,8 +13,6 @@ async def get_menu_item_price(item_id: int) -> int:
             menu_response.raise_for_status()
             menu_item_data = menu_response.json()
             return menu_item_data["price"]
-    except httpx.HTTPStatusError:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Блюдо с ID {item_id} не найдено в меню"
-        )
+        
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail="menu service is broken")

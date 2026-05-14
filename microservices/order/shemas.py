@@ -1,27 +1,22 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from datetime import datetime
 from typing import List
 
-# Схема для одного элемента в заказе.
 class OrderItem(BaseModel):
     menu_item_id: int
-    quantity: int = Field(gt=0)
+    quantity: int 
 
-# Схема для всего тела запроса на создание заказа
 class OrderRequest(BaseModel):
-    items: List[OrderItem] # список объектов OrderItem
+    items: List[OrderItem] 
 
-# Схема для данных, которые возвращает Auth Service
 class AuthResponse(BaseModel):
     user_id: int
 
-# Схема для данных, которые возвращает Menu Service
 class MenuItem(BaseModel):
     id: int
     name: str
     price: int
 
-# Схема для ответа, который Order Service вернет клиенту
 class OrderResponse(BaseModel):
     order_id: int
     user_id: int
