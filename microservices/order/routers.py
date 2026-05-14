@@ -1,45 +1,46 @@
-from fastapi import FastAPI, Depends, APIRouter, Form, HTTPException, status
+from fastapi import FastAPI, Depends, APIRouter, Form, HTTPException, status, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from shemas import OrderRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database import get_session
 from typing import Annotated
 from menu_service import get_menu_item_price
-from auth_service import get_user_id
+from kafkaa import get_user_id_via_kafka
 from models import OrderModel, OrderItemModel
 
 
 router = APIRouter()
 app = FastAPI(title="Order Service API")
+security = HTTPBearer()
 
 @router.post("/orders", status_code=201)
 async def create_order(
     order_data: OrderRequest,
     session: AsyncSession = Depends(get_session),
-    Authorization: str = Annotated[str, Form()]
+    credentials: HTTPAuthorizationCredentials = Security(security)
 ):
-    user_id = await get_user_id(Authorization)
+    user_id = await get_user_id_via_kafka(credentials.credentials)
 
     total_price = 0 
-    order_items_list = []
+    order_list = []
 
     for item in order_data.items:
-        # временно фиксируем цену
-        price_at_time_of_order = await get_menu_item_price(item.menu_item_id)
-        total_price += price_at_time_of_order * item.quantity
+        price = await get_menu_item_price(item.menu_item_id)
+        total_price += price * item.quantity
 
         order_item = OrderItemModel(
             menu_item_id=item.menu_item_id,
-            price_at_time_of_order=price_at_time_of_order,
+            price_at_time_of_order=price,
             quantity=item.quantity
         )
-        order_items_list.append(order_item)
+        order_list.append(order_item)
 
     new_order = OrderModel(
         user_id=user_id,
         total_price=total_price,
         status="pending",
-        items=order_items_list
+        items=order_list
     )
 
     session.add(new_order)
@@ -51,9 +52,9 @@ async def create_order(
 @router.get("/my_orders")
 async def get_my_orders(
     session: AsyncSession = Depends(get_session),
-    Authorization: str = Annotated[str, Form()]
+    credentials: HTTPAuthorizationCredentials = Security(security)
 ):
-    user_id = await get_user_id(Authorization)
+    user_id = await get_user_id_via_kafka(credentials.credentials)
     
     result = await session.execute(
         select(OrderModel).where(OrderModel.user_id == user_id)
@@ -69,9 +70,9 @@ async def get_my_orders(
 async def canceled_order(
     order_id: str = Annotated[str, Form()],
     session: AsyncSession = Depends(get_session),
-    Authorization: str = Annotated[str, Form()]
+    credentials: HTTPAuthorizationCredentials = Security(security)
 ):
-    user_id = await get_user_id(Authorization)
+    user_id = await get_user_id_via_kafka(credentials.credentials)
     
     result = await session.execute(select(OrderModel).where(OrderModel.id == int(order_id)))
     order = result.scalar_one_or_none()

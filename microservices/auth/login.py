@@ -1,4 +1,3 @@
-from typing import Annotated
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 import pwd_jwt_operations as operats
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +6,7 @@ from models import AuthModel
 from sqlalchemy import select
 from database import get_session
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
+from jwt import InvalidTokenError
 
 router = APIRouter(tags=["JWT"])
 
@@ -80,3 +79,21 @@ async def verify_token_endpoint(
     ):
     
     return {"user_id": user.id} 
+
+async def validate_token_from_kafka(token: str, session: AsyncSession) -> int:
+    if token.lower().startswith("bearer "):
+        token = token[7:]
+    
+    payload = operats.decode_jwt(token=token)
+    user_id = int(payload.get("sub"))
+    
+    result = await session.execute(select(AuthModel).where(AuthModel.id == user_id))
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token"
+        )
+    
+    return user.id
