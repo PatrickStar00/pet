@@ -15,4 +15,4 @@ async def get_menu_item_price(item_id: int) -> int:
             return menu_item_data["price"]
         
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail="menu service is broken")
+        raise HTTPException(status_code=e.response.status_code, detail="menu service is broken {e}")

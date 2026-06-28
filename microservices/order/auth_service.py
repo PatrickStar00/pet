@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-AUTH_SERVICE_URL = os.getenv("AUTH_URL")
+AUTH_ROUTER= os.getenv("AUTH_ROUTER")
 
 async def get_user_id(authorization_header: str) -> int:
     token = (authorization_header or "").strip()
@@ -14,7 +14,7 @@ async def get_user_id(authorization_header: str) -> int:
     try:
         async with httpx.AsyncClient() as client:
             auth_response = await client.get(
-                AUTH_SERVICE_URL,
+                AUTH_ROUTER,
                 headers={"Authorization": token}
             )
             auth_response.raise_for_status()

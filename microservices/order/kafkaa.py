@@ -48,7 +48,7 @@ producer = None
 
 async def start_producer():
     global producer
-    producer = AIOKafkaProducer(bootstrap_servers="localhost:9092")
+    producer = AIOKafkaProducer(bootstrap_servers="kafka:9092")
     await producer.start()
     
 async def stop_producer():
@@ -63,7 +63,7 @@ async def send(topic: str, data: dict):
 async def listen_auth_responses():
     consumer = AIOKafkaConsumer(
         "auth_responses",
-        bootstrap_servers="localhost:9092",
+        bootstrap_servers="kafka:9092",
         group_id="order-service",
     )
     await consumer.start()
